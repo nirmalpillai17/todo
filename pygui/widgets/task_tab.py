@@ -29,8 +29,8 @@ class TasksTab(ctk.CTkFrame):
 
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=5)
-    
-        # create note input box   
+
+        # create note input box
         self.note = tk.StringVar()
         self.inp_box = ctk.CTkEntry(
             self,

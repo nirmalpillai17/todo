@@ -1,1 +1,3 @@
 pygui/.venv/
+pygui/utils/__pycache__/
+pygui/widgets/__pycache__/

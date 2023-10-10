@@ -6,20 +6,13 @@ from utils.events import *
 from widgets.button import StyledButton
 from widgets.check_box import StyledCheckBox
 
-from utils.text_wrap import break_sentence
-
 
 class CardFrame(ctk.CTkFrame):
-    def __init__(
-            self,
-            master,
-            note,
-            time,
-            fg_color=COLOR_SET,
-            **kwargs,
-    ):
+    def __init__(self, master, note, time,
+                 fg_color=COLOR_SET, **kwargs):
+
         super().__init__(
-            master,
+            master=master,
             fg_color=fg_color,
             border_width=2,
             border_color=BORDER_COLOR,
@@ -27,12 +20,9 @@ class CardFrame(ctk.CTkFrame):
             **kwargs,
         )
 
-        # format text to wrap on line break
-        self.note = break_sentence(note, 60)
-
         # create button to remove task
         self.btn_remove = StyledButton(
-            self,
+            master=self,
             text="\u00D7",
             width=45,
             height=45,
@@ -42,8 +32,8 @@ class CardFrame(ctk.CTkFrame):
 
         # create label to display task
         self.task_label = ctk.CTkLabel(
-            self,
-            text=self.note,
+            master=self,
+            text=note,
             font=CALB_22,
             justify=tk.LEFT,
         )
@@ -58,8 +48,8 @@ class CardFrame(ctk.CTkFrame):
 
         # create checkbox to mark task as done
         self.cb_done = StyledCheckBox(
-            self,
-            text="",
+            master=self,
+            text='',
             single_click=True,
             command=self.mark_as_done,
         )
@@ -69,9 +59,12 @@ class CardFrame(ctk.CTkFrame):
     def remove_instance(self):
         self.pack_forget()
         self.destroy()
-    
+
     # convert task text to strikethrough
     def mark_as_done(self):
-        self.task_label.configure(
-            font=("Calibri", 22, "bold", "overstrike"),
-        )
+        self.task_label.configure(font=("Calibri", 22, "bold", "overstrike"))
+
+    # method to set word wrap for label
+    def set_wordwrap(self):
+        self.update_idletasks()
+        self.task_label.configure(wraplength=self.winfo_width() * 0.6)

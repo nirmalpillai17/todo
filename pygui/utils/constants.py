@@ -1,3 +1,7 @@
+# window dimensions
+WIDTH = 900
+HEIGHT = 700
+
 # create font objects
 CALB_22 = ("Calibri", 22, "bold")
 CALB_16 = ("Calibri", 16, "bold")
