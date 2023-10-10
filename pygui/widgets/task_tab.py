@@ -9,14 +9,9 @@ from widgets.button import StyledButton
 
 # main application class
 class TasksTab(ctk.CTkFrame):
-    def __init__(
-        self,
-        master,
-        fg_color=COLOR_SET,
-        **kwargs,
-    ):
+    def __init__(self, master, fg_color=COLOR_SET, **kwargs):
         super().__init__(
-            master,
+            master=master,
             fg_color=fg_color,
             corner_radius=0,
             **kwargs,
@@ -38,7 +33,6 @@ class TasksTab(ctk.CTkFrame):
             height=45,
             width=45,
             font=CALB_22,
-            placeholder_text="Enter your note...",
             corner_radius=0,
         )
         self.inp_box.grid(row=0, column=1, sticky='ew')
