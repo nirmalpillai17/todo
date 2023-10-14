@@ -2,7 +2,6 @@ package backend
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -23,6 +22,7 @@ func NewHttpServer(a string, db DBHandler) *http.Server {
 	s.HandleFunc("/nr", hs.handleCreateRecord).Methods("POST")
 	s.HandleFunc("/gr", hs.handleGetAllRecords).Methods("GET")
 	s.HandleFunc("/ur", hs.handleUpdateRecord).Methods("POST")
+	s.HandleFunc("/dr", hs.handleDeleteRecord).Methods("POST")
 
 	return &http.Server{
 		Addr:         a,
@@ -38,12 +38,14 @@ func (hs handleServer) handleCreateRecord(w http.ResponseWriter, r *http.Request
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	td.Time = time.Now()
+
 	id, err := hs.db.CreateRecord(td)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	fmt.Fprint(w, id)
+	json.NewEncoder(w).Encode(id)
 	return
 }
 
@@ -68,3 +70,14 @@ func (hs handleServer) handleUpdateRecord(w http.ResponseWriter, r *http.Request
 	}
 }
 
+func (hs handleServer) handleDeleteRecord(w http.ResponseWriter, r *http.Request) {
+	var id Id
+	err := json.NewDecoder(r.Body).Decode(&id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if err := hs.db.DeleteRecord(id); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
