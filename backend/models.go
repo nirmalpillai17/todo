@@ -4,7 +4,7 @@ import "time"
 
 type Task map[Id]TaskData
 
-type Id int64
+type Id string
 
 type TaskData struct {
 	Note   string    `json:"note"`
@@ -15,7 +15,7 @@ type TaskData struct {
 type DBHandler interface {
 	CreateRecord(td TaskData) (Id, error)
 	GetAllRecords() (Task, error)
-	UpdateRecord(t Task) error
+	UpdateRecord(id Id, td TaskData) error
 	DeleteRecord(id Id) error
 }
 

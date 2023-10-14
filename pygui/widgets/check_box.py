@@ -4,8 +4,8 @@ from utils.constants import *
 from utils.events import *
 
 class StyledCheckBox(ctk.CTkCheckBox, EventHandler):
-   def __init__(self, master, command, width=45,
-                height=45, single_click=True, **kwargs):
+   def __init__(self, master, command, status, 
+                width=45, height=45, **kwargs):
 
       super().__init__(
          master=master,
@@ -13,18 +13,15 @@ class StyledCheckBox(ctk.CTkCheckBox, EventHandler):
          height=height,
          fg_color=BTN_COLOR,
          hover_color=BTN_COLOR_HOVER,
-         command=self.cmd_wrapper,
+         command=command,
          corner_radius=0,
          **kwargs,
       )
 
-      self.sc = single_click
-      self.func = command
+      if status == DONE:
+         self.set_disabled()
 
-   # disable the checkbox after first click
-   # in case single_click is set to True
-   def cmd_wrapper(self):
-      if self.sc:
-         self.configure(fg_color=BTN_COLOR_HOVER, state=tk.DISABLED)
-      self.func()
-      return
+   def set_disabled(self):
+      self.select()
+      self.configure(fg_color=BTN_COLOR_HOVER, state=tk.DISABLED)
+

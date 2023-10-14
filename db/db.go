@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -22,7 +23,7 @@ const qselect string = "SELECT rowid, * FROM tasks;"
 
 const qinsert string = "INSERT INTO tasks VALUES(?,?,?);"
 
-const qupdate string = "UPDATE tasks SET note=?, time=?, status=? WHERE rowid=?"
+const qupdate string = "UPDATE tasks SET note=?, status=? WHERE rowid=?"
 
 const qdelete string = "DELETE FROM tasks WHERE rowid=?"
 
@@ -52,17 +53,18 @@ func NewDBService(ctx context.Context) (*DBService, error) {
 }
 
 
-func (dbs *DBService) CreateRecord(td be.TaskData) (be.Id, error) {
+func (dbs *DBService) CreateRecord(td be.TaskData) (id be.Id, err error) {
 	out, err := dbs.db.ExecContext(dbs.ctx, qinsert, td.Note, td.Time, td.Status)
 	if err != nil {
-		return 0, err
+		return id, err
 	}
 	
-	id, err := out.LastInsertId()
+	lid, err := out.LastInsertId()
 	if err != nil {
-		return 0, err
+		return id, err
 	}
-	return be.Id(id), nil
+	id = be.Id(fmt.Sprint(lid))
+	return id, nil
 }
 
 func(dbs *DBService) GetAllRecords() (be.Task, error) {
@@ -73,13 +75,15 @@ func(dbs *DBService) GetAllRecords() (be.Task, error) {
 	defer rows.Close()
 	
 	task := make(be.Task, 0)
+	
+	var id int64
+	var td be.TaskData
+
 	for rows.Next() {
-		var id be.Id
-		var td be.TaskData
 		if err := rows.Scan(&id, &td.Note, &td.Time, &td.Status); err != nil {
 			return nil, err
 		}
-		task[id] = td
+		task[be.Id(fmt.Sprint(id))] = td
 	}
 
 	if err := rows.Err(); err != nil {
@@ -88,12 +92,10 @@ func(dbs *DBService) GetAllRecords() (be.Task, error) {
 	return task, nil
 }
 
-func (dbs *DBService) UpdateRecord(t be.Task) error {
-	for id := range t {
-		_, err := dbs.db.ExecContext(dbs.ctx, qupdate, t[id].Note, t[id].Time, t[id].Status, id)
-		if err != nil {
-			return err
-		}
+func (dbs *DBService) UpdateRecord(id be.Id, td be.TaskData) error {
+	_, err := dbs.db.ExecContext(dbs.ctx, qupdate, td.Note, td.Status, id)
+	if err != nil {
+		return err
 	}
 	return nil
 }

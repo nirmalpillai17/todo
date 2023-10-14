@@ -1,6 +1,9 @@
 import customtkinter as ctk
 import tkinter as tk
 
+import requests
+import json
+
 from utils.constants import *
 
 from widgets.scroll_frame import StyledScrollFrame
@@ -56,10 +59,12 @@ class TasksTab(ctk.CTkFrame):
         # create scroll frame for task cards
         self.tasks_frame = StyledScrollFrame(self)
         self.tasks_frame.grid(row=1, column=0, columnspan=3, sticky='nsew')
+        
+        self.tasks_frame.load_cards()
 
     def add_task(self):
         if self.note.get():
-            self.tasks_frame.add_note_card(self.note.get(), "hello")
+            self.tasks_frame.add_note_card(self.note.get(), UNDONE)
         self.clear_text()
 
     def clear_text(self):

@@ -16,3 +16,7 @@ FGD_COLOR = "#242424"
 # first value  : light theme color
 # second value : dark theme color
 COLOR_SET = (FGL_COLOR, FGD_COLOR)
+
+# status constants
+DONE = 0
+UNDONE = 1

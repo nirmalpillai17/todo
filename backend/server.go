@@ -21,8 +21,8 @@ func NewHttpServer(a string, db DBHandler) *http.Server {
 	s := r.PathPrefix("/todo").Subrouter()
 	s.HandleFunc("/nr", hs.handleCreateRecord).Methods("POST")
 	s.HandleFunc("/gr", hs.handleGetAllRecords).Methods("GET")
-	s.HandleFunc("/ur", hs.handleUpdateRecord).Methods("POST")
-	s.HandleFunc("/dr", hs.handleDeleteRecord).Methods("POST")
+	s.HandleFunc("/ur/{id}", hs.handleUpdateRecord).Methods("PUT")
+	s.HandleFunc("/dr/{id}", hs.handleDeleteRecord).Methods("DELETE")
 
 	return &http.Server{
 		Addr:         a,
@@ -59,25 +59,32 @@ func (hs handleServer) handleGetAllRecords(w http.ResponseWriter, r *http.Reques
 }
 
 func (hs handleServer) handleUpdateRecord(w http.ResponseWriter, r *http.Request) {
-	task := Task{}
-	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
+	vars := mux.Vars(r)
+	td := TaskData{}
+	if err := json.NewDecoder(r.Body).Decode(&td); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	if err := hs.db.UpdateRecord(task); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if id, ok := vars["id"]; ok {
+		if err := hs.db.UpdateRecord(Id(id), td); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 }
 
 func (hs handleServer) handleDeleteRecord(w http.ResponseWriter, r *http.Request) {
-	var id Id
-	err := json.NewDecoder(r.Body).Decode(&id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	vars := mux.Vars(r)
+	if id, ok := vars["id"]; ok {
+		if err := hs.db.DeleteRecord(Id(id)); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
 		return
-	}
-	if err := hs.db.DeleteRecord(id); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
